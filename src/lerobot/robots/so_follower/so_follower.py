@@ -157,16 +157,23 @@ class SOFollower(Robot):
             self.bus.configure_motors()
             for motor in self.bus.motors:
                 self.bus.write("Operating_Mode", motor, OperatingMode.POSITION.value)
+                time.sleep(0.1)
                 # Set P_Coefficient to lower value to avoid shakiness (Default is 32)
                 self.bus.write("P_Coefficient", motor, 16)
+                time.sleep(0.1)
                 # Set I_Coefficient and D_Coefficient to default value 0 and 32
                 self.bus.write("I_Coefficient", motor, 0)
+                time.sleep(0.1)
                 self.bus.write("D_Coefficient", motor, 32)
+                time.sleep(0.1)
 
                 if motor == "gripper":
                     self.bus.write("Max_Torque_Limit", motor, 500)  # 50% of max torque to avoid burnout
+                    time.sleep(0.1)
                     self.bus.write("Protection_Current", motor, 250)  # 50% of max current to avoid burnout
+                    time.sleep(0.1)
                     self.bus.write("Overload_Torque", motor, 25)  # 25% torque when overloaded
+                    time.sleep(0.1)
 
     def setup_motors(self) -> None:
         for motor in reversed(self.bus.motors):
@@ -178,7 +185,7 @@ class SOFollower(Robot):
     def get_observation(self) -> RobotObservation:
         # Read arm position
         start = time.perf_counter()
-        obs_dict = self.bus.sync_read("Present_Position")
+        obs_dict = self.bus.sync_read("Present_Position", num_retry=5)
         obs_dict = {f"{motor}.pos": val for motor, val in obs_dict.items()}
         dt_ms = (time.perf_counter() - start) * 1e3
         logger.debug(f"{self} read state: {dt_ms:.1f}ms")

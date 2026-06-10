@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import abc
 import logging
+import time
 from collections.abc import Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -1181,6 +1182,7 @@ class SerialMotorsBus(MotorsBusBase):
             comm = self.sync_reader.txRxPacket()
             if self._is_comm_success(comm):
                 break
+            time.sleep(0.01)
             logger.debug(
                 f"Failed to sync read @{addr=} ({length=}) on {motor_ids=} ({n_try=}): "
                 + self.packet_handler.getTxRxResult(comm)
